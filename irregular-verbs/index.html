@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -49,6 +49,27 @@ button{font:inherit;cursor:pointer;border:0}
 .pts{font-size:.9rem;color:#555;margin-top:6px;line-height:1.6}
 .pill{display:inline-block;border-radius:999px;padding:2px 10px;color:#fff;font-weight:800;font-size:.85em}
 .pill.t1{background:var(--easy)}.pill.t2{background:var(--mid)}.pill.t3{background:var(--hard)}
+.txt{font:inherit;font-weight:700;font-size:1rem;padding:7px 12px;border:2px solid #ddd;border-radius:8px;width:180px}
+.hint{color:#777;font-size:.85rem;font-weight:600}
+.tricky{background:#fdecef;color:#7a1023;border-radius:8px;padding:8px 12px;font-size:.9rem;font-weight:700;margin:-4px 0 6px 164px}
+#setup .card{max-height:96vh;overflow:auto}
+.pv{width:min(1100px,96vw);max-height:94vh;display:flex;flex-direction:column;padding:22px 26px}
+.pvHead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.pvHead h2{color:var(--bg);font-size:1.8rem}.pvHead .sub{color:#666;font-weight:600}
+.pvBtns{display:flex;gap:8px;flex-wrap:wrap}.pvBtns .btn{font-size:1rem;padding:.5em 1em}
+#pvList{overflow:auto;padding-left:0;list-style:none;counter-reset:q}
+#pvList li{display:flex;gap:12px;align-items:center;border-bottom:1px solid #eee;padding:9px 4px}
+#pvList .n{font-weight:900;color:#999;width:2em}
+#pvList .qq{flex:1}
+#pvList .qt{font-weight:800}
+#pvList .op{color:#555;font-size:.95rem;margin-top:3px}
+#pvList .op b{color:#e21b3c}
+#pvList .tag{font-size:.75rem;color:#888;font-weight:700;text-transform:uppercase;margin-left:6px}
+#pvList .act button{background:#f2f2f2;border-radius:6px;padding:6px 10px;font-weight:800;margin-left:4px}
+#pvList .act button:hover{background:#e5e5e5}
+.prompt .verb.sentence{font-size:min(6.5vh,3.4rem);line-height:1.25;margin:.25em 0}
+.badge.second{background:linear-gradient(90deg,#1368ce,#26890c)}
+.improve li span:last-child{color:var(--green)!important}
 .warn{background:#fff3cd;color:#664d03;border-radius:8px;padding:12px 14px;margin-top:14px;font-size:.92rem;line-height:1.5}
 /* ---------- lobby ---------- */
 #lobby{justify-content:flex-start;padding-top:3vh}
@@ -104,6 +125,7 @@ button{font:inherit;cursor:pointer;border:0}
 .qTop .qNum{min-width:150px;text-align:center}
 #bNext{min-width:150px}
 #bNext.hidden{display:inline-block!important;visibility:hidden}
+body:has(#hq:not(.hidden)) #hostBar{display:none}
 /* ---------- leaderboard ---------- */
 #lb h2,#final h2{font-size:min(7vh,3.4rem);font-weight:900;margin-bottom:3vh;background:#fff;color:#1b1b1b;padding:.2em .9em;border-radius:10px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
 .lbList{width:min(900px,92vw);display:flex;flex-direction:column;gap:1.2vh}
@@ -164,29 +186,46 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 
 <!-- ======================= HOST ======================= -->
 <div id="hostBar" class="hidden">
-  <button id="bSound" title="Ses">🔊 Ses</button>
-  <button id="bFull" title="Tam ekran">⛶ Tam ekran</button>
+  <button id="bSound" title="Sound">🔊 Sound</button>
+  <button id="bFull" title="Full screen">⛶ Full screen</button>
 </div>
 
 <section id="setup" class="screen hidden">
   <div class="card">
     <h1 class="logo">Irregular Verbs Challenge</h1>
-    <div class="sub">Tahtaya QR gelir, öğrenciler telefonlarından katılır. Zor sorular daha çok puan!</div>
-    <div class="row"><label class="t">Soru sayısı</label><div class="chips" data-key="count">
-      <button class="chip" data-v="10">10</button><button class="chip on" data-v="15">15</button><button class="chip" data-v="20">20</button><button class="chip" data-v="25">25</button></div></div>
-    <div class="row"><label class="t">Süre (saniye)</label><div class="chips" data-key="time">
+    <div class="sub">Scan the QR code, answer on your phone. Harder questions = more points!</div>
+    <div class="row"><label class="t">Questions</label><div class="chips" data-key="count">
+      <button class="chip" data-v="10">10</button><button class="chip" data-v="20">20</button><button class="chip" data-v="30">30</button><button class="chip on" data-v="40">40</button><button class="chip" data-v="50">50</button></div>
+      <span class="hint" id="estTime"></span></div>
+    <div class="row"><label class="t">Time (seconds)</label><div class="chips" data-key="time">
       <button class="chip" data-v="15">15</button><button class="chip on" data-v="20">20</button><button class="chip" data-v="30">30</button></div></div>
-    <div class="row"><label class="t">Zorluk</label><div class="chips" data-key="mix">
-      <button class="chip" data-v="easy">Kolay ağırlıklı</button><button class="chip on" data-v="mixed">Karışık</button><button class="chip" data-v="hard">Zor ağırlıklı</button></div></div>
-    <div class="row"><label class="t">Soru türleri</label><div class="chips multi" data-key="types">
+    <div class="row"><label class="t">Difficulty</label><div class="chips" data-key="mix">
+      <button class="chip" data-v="easy">Mostly easy</button><button class="chip" data-v="mixed">Mixed</button><button class="chip on" data-v="hard">Mostly hard</button></div></div>
+    <div class="row"><label class="t">Class</label><input id="inClass" class="txt" maxlength="12" placeholder="e.g. 9A (optional)">
+      <span class="hint">Saves the class's tricky verbs on this computer</span></div>
+    <div class="row"><label class="t">Verbs</label><div class="chips multi" data-key="range">
+      <button class="chip on" data-v="p1">Page 1 (awake–go)</button><button class="chip on" data-v="p2">Page 2 (grow–sing)</button>
+      <button class="chip on" data-v="p3">Page 3 (sink–write)</button><button class="chip hidden" data-v="tricky" id="chipTricky">⚠ Tricky verbs</button></div></div>
+    <div id="trickyInfo" class="tricky hidden"></div>
+    <div class="row"><label class="t">Question types</label><div class="chips multi" data-key="types">
       <button class="chip on" data-v="v2">Past Simple (V2)</button><button class="chip on" data-v="v3">Past Participle (V3)</button>
-      <button class="chip on" data-v="base">Hangi fiil? (V1)</button><button class="chip on" data-v="triple">Doğru üçlü</button></div></div>
+      <button class="chip on" data-v="base">Which verb? (V1)</button><button class="chip on" data-v="triple">Correct V1–V2–V3</button><button class="chip on" data-v="sent">Sentences</button></div></div>
     <div class="pts">
-      <span class="pill t1">KOLAY</span> 500 &nbsp; <span class="pill t2">ORTA</span> 1000 &nbsp; <span class="pill t3">ZOR</span> 1500 puan
-      — hızlı cevap tam puan alır, son saniyede yarısı. Üst üste doğru 🔥 bonus verir, <b>son soru 2x puan</b>.
+      <span class="pill t1">EASY</span> 500 &nbsp; <span class="pill t2">MEDIUM</span> 1000 &nbsp; <span class="pill t3">HARD</span> 1500 points
+      — fast answers get full points, last-second answers get half. Answer streaks 🔥 give bonus points, and <b>the final question is worth 2x</b>.
     </div>
     <div id="cfgWarn" class="warn hidden"></div>
-    <div class="row" style="justify-content:flex-end;margin-top:20px"><button id="bOpen" class="btn primary big">Oyun odası aç ▶</button></div>
+    <div class="row" style="justify-content:flex-end;margin-top:20px;gap:12px"><button id="bPrev" class="btn big">👁 Preview questions</button><button id="bOpen" class="btn primary big">Open game room ▶</button></div>
+  </div>
+</section>
+
+<section id="preview" class="screen hidden">
+  <div class="card pv">
+    <div class="pvHead">
+      <div><h2>Question preview</h2><div class="sub">Teacher view · correct answers in <b style="color:#e21b3c">red</b>. Don't show this screen to students!</div></div>
+      <div class="pvBtns"><button class="btn" id="bPvBack">◀ Settings</button><button class="btn" id="bPvNew">↻ New set</button><button class="btn primary" id="bPvOpen">Open game room ▶</button></div>
+    </div>
+    <ol id="pvList"></ol>
   </div>
 </section>
 
@@ -194,26 +233,26 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <div class="joinBox">
     <div class="qr" id="qr"></div>
     <div class="joinText">
-      <div>📱 QR kodu okut ya da adrese gir:</div>
+      <div>📱 Scan the QR code or go to:</div>
       <div class="url" id="joinUrl"></div>
-      <div class="pinLabel">Oyun PIN'i</div>
+      <div class="pinLabel">Game PIN</div>
       <div class="pin" id="pin">------</div>
     </div>
   </div>
   <div class="lobbyMid">
     <div class="count"><span id="pCount">0</span> 👤</div>
     <div class="lobbyTitle logo">Irregular Verbs Challenge</div>
-    <button id="bStart" class="btn primary big" disabled>Başla</button>
+    <button id="bStart" class="btn primary big" disabled>Start</button>
   </div>
   <div id="players"></div>
-  <div class="waitMsg" id="waitMsg">Öğrenciler bekleniyor…</div>
+  <div class="waitMsg" id="waitMsg">Waiting for players…</div>
 </section>
 
 <section id="hq" class="screen hidden">
   <div class="qTop">
     <div class="qNum" id="qNum">1 / 15</div>
     <div id="qBadge" class="badge t1">KOLAY · 500</div>
-    <button class="btn hidden" id="bNext">İleri ▶</button>
+    <button class="btn hidden" id="bNext">Next ▶</button>
   </div>
   <div class="prompt">
     <div class="p1" id="qP1"></div>
@@ -223,15 +262,15 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
   <div class="mid" id="qMid">
     <div class="timer" id="qTimer">20</div>
     <div id="qCenter"></div>
-    <div class="ansCount"><b id="qAns">0</b>cevap</div>
+    <div class="ansCount"><b id="qAns">0</b>answers</div>
   </div>
   <div class="opts" id="qOpts"></div>
 </section>
 
 <section id="lb" class="screen hidden">
-  <h2>Sıralama</h2>
+  <h2>Scoreboard</h2>
   <div class="lbList" id="lbList"></div>
-  <button class="btn nextBtn" id="bNext2">Sonraki soru ▶</button>
+  <button class="btn nextBtn" id="bNext2">Next question ▶</button>
 </section>
 
 <section id="final" class="screen hidden">
@@ -241,11 +280,12 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
     <div class="pod p3"><div class="who" id="pod3"></div><div class="blk">3</div></div>
   </div>
   <div class="finalSide">
-    <div class="missed"><h3>😬 En çok zorlanılan sorular</h3><ul id="missed"></ul></div>
+    <div class="missed"><h3>😬 Trickiest verbs</h3><ul id="missed"></ul></div>
     <div class="finalBtns">
-      <button class="btn" id="bFullLb">Tüm sıralama</button>
-      <button class="btn" id="bCsv">Sonuçları indir (CSV)</button>
-      <button class="btn primary" id="bAgain">Yeni oyun</button>
+      <button class="btn primary" id="bSecond">🔁 Second chance</button>
+      <button class="btn" id="bFullLb">Full scoreboard</button>
+      <button class="btn" id="bCsv">Download results (CSV)</button>
+      <button class="btn" id="bAgain">New game</button>
     </div>
   </div>
 </section>
@@ -255,16 +295,16 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 <section id="pJoin" class="pScreen hidden">
   <h1 class="logo">Irregular Verbs<small>CHALLENGE</small></h1>
   <div class="pForm">
-    <input id="inPin" inputmode="numeric" maxlength="6" placeholder="Oyun PIN'i" autocomplete="off">
-    <input id="inName" maxlength="14" placeholder="Takma adın" autocomplete="off">
+    <input id="inPin" inputmode="numeric" maxlength="6" placeholder="Game PIN" autocomplete="off">
+    <input id="inName" maxlength="14" placeholder="Nickname or team name" autocomplete="off">
     <div class="err" id="joinErr"></div>
-    <button class="btn primary" id="bJoin">Katıl</button>
+    <button class="btn primary" id="bJoin">Join</button>
   </div>
 </section>
 <section id="pWait" class="pScreen hidden">
-  <div class="pMsg" id="pWaitMsg">Oyundasın! 🎉</div>
+  <div class="pMsg" id="pWaitMsg">You're in! 🎉</div>
   <div class="spinner"></div>
-  <div class="pSub" id="pWaitSub">Adını tahtada görüyor musun?</div>
+  <div class="pSub" id="pWaitSub">Can you see your name on the board?</div>
 </section>
 <section id="pPlay" class="hidden">
   <div class="pBar"><span id="pQn">1/15</span><span id="pTier"></span><span class="sc" id="pScore">0</span></div>
@@ -2625,10 +2665,79 @@ const VERBS = [
 // Yanlış şık olarak KULLANILMAYACAK biçimler (başka anlamda / bazı sözlüklerde doğru)
 const NEVER = {lie:["lied"],hang:["hanged"],spell:["spelled"],shine:["shined"],show:["showed"],bet:["betted"],
   quit:["quitted"],wake:["waked"],awake:["awaked"],strike:["stricken"],shrink:["shrunk"],sink:["sunk"],sing:["sung"],
-  ring:["rung"],wind:["winded"],get:["gotten"],prove:["proven"],swim:["swum"],speed:["speeded"],light:["lighted"]};
+  ring:["rung"],wind:["wounden","wond"],get:["gotten"],prove:["proven"],swim:["swum"],speed:["speded","spedded"],light:["lighted"]};
+
+
+// CÜMLE BANKASI: fiil: [sütun 1=V2 2=V3, cümle, (isteğe bağlı) tek doğru biçim]
+const SENT = {
+awake:[1,"I ___ at 5 a.m. because of the storm last night."],be:[1,"We ___ very tired after the match yesterday.","were"],
+beat:[2,"Our team has ___ every other team this season."],become:[1,"My aunt ___ a doctor in 2015."],
+begin:[2,"The film had already ___ when we arrived."],bet:[1,"My brother ___ me that I couldn't eat ten pancakes."],
+bite:[2,"Ouch! A mosquito has ___ me!"],bleed:[1,"His knee ___ a lot after he fell off his bike."],
+blow:[1,"The wind ___ my hat into the river yesterday."],break:[2,"Oh no! I've ___ my phone screen again."],
+bring:[1,"She ___ her little brother to the party last Saturday."],build:[1,"My grandfather ___ this house in 1970."],
+burn:[1,"I ___ my finger on the hot pan yesterday."],burst:[1,"The balloon ___ when the cat touched it."],
+buy:[2,"Have you ___ a ticket for the concert yet?"],catch:[1,"The police ___ the thief last night."],
+choose:[2,"Have you ___ a book for your project?"],come:[1,"Our cousins ___ to visit us last weekend."],
+cost:[1,"These shoes ___ a lot of money last year."],creep:[1,"The cat ___ quietly towards the bird."],
+cut:[1,"I ___ my finger while I was making a salad."],deal:[2,"The teacher has ___ with the problem very well."],
+dig:[1,"The dog ___ a big hole in the garden yesterday."],do:[2,"Have you ___ your homework yet?"],
+draw:[1,"Ali ___ a beautiful picture of his cat last week."],dream:[1,"Last night I ___ that I could fly."],
+drink:[2,"I'm not thirsty. I've already ___ two glasses of water."],drive:[1,"My dad ___ us to school this morning."],
+eat:[2,"Have you ever ___ sushi?"],fall:[1,"Ayşe ___ off her bike and hurt her arm."],
+feed:[1,"Who ___ the fish this morning?"],feel:[1,"I ___ really happy when I saw my exam results."],
+fight:[1,"The two cats ___ in the garden last night."],find:[2,"I've looked everywhere, but I haven't ___ my keys."],
+fly:[2,"Have you ever ___ in a hot-air balloon?"],forbid:[2,"My parents have ___ me to play games on school nights."],
+forget:[1,"Sorry, I ___ to bring my book yesterday."],forgive:[1,"She ___ her friend for breaking her pen."],
+freeze:[1,"It was so cold that the lake ___ last winter."],get:[1,"I ___ a new bike for my birthday last year."],
+give:[2,"My aunt has ___ me a lovely scarf."],go:[2,"Where is Emre? He has ___ to the library."],
+grow:[2,"Wow, you've ___ so much since last summer!"],hang:[1,"We ___ our coats on the hooks and sat down."],
+have:[1,"We ___ a great time at the party last night."],hear:[2,"Have you ___ the news? We won the match!"],
+hide:[1,"The children ___ behind the door to surprise their mum."],hit:[1,"He ___ the ball over the wall yesterday."],
+hold:[1,"The baby ___ my finger and smiled."],hurt:[1,"I ___ my leg during the football match."],
+keep:[2,"She has ___ all the letters from her grandmother."],know:[2,"I have ___ my best friend since kindergarten."],
+lead:[1,"Our captain ___ the team to victory last Sunday."],lean:[1,"He ___ against the wall and closed his eyes."],
+learn:[2,"I have ___ a lot of new words this term."],leave:[1,"The bus ___ ten minutes ago."],
+lend:[1,"Can you give back the pen I ___ you last week?"],let:[1,"My mum ___ me stay up late last Friday."],
+lie:[1,"I was so tired that I ___ on the sofa all afternoon."],light:[1,"We ___ the candles on Grandma's birthday cake."],
+lose:[2,"I've ___ my wallet. Can you help me find it?"],make:[1,"Mum ___ a delicious chocolate cake yesterday."],
+mean:[1,"I'm sorry. I ___ to call you, but I forgot."],meet:[2,"Have you ___ our new classmate?"],
+overcome:[2,"She has ___ her fear of speaking in public."],pay:[1,"Dad ___ for our dinner last night."],
+prove:[1,"The scientist ___ that her idea was correct."],put:[2,"Where have you ___ my glasses?"],
+quit:[1,"My uncle ___ smoking two years ago."],read:[2,"I have ___ this book three times!"],
+ride:[2,"Have you ever ___ a horse?"],ring:[1,"The bell ___ and everyone ran outside."],
+rise:[2,"Prices have ___ a lot this year."],run:[1,"I ___ all the way to school because I was late."],
+say:[1,"The teacher ___ that the test is on Monday."],see:[2,"Have you ___ my phone anywhere?"],
+seek:[1,"After the storm, many families ___ help from their neighbours."],sell:[2,"They have ___ their old car."],
+send:[1,"I ___ you a message last night. Did you get it?"],set:[1,"We ___ the table before the guests arrived."],
+shake:[1,"He ___ my hand and said hello."],shine:[1,"The sun ___ all day yesterday."],
+shoot:[1,"The player ___ the ball and scored a goal!"],show:[2,"Has the teacher ___ you your exam results?"],
+shrink:[1,"Oh no! My sweater ___ in the washing machine."],shut:[1,"He ___ the door quietly so he didn't wake the baby."],
+sing:[1,"We ___ 'Happy Birthday' to Selin yesterday."],sink:[1,"The Titanic ___ in 1912."],
+sit:[1,"We ___ in the front row at the concert."],sleep:[1,"I ___ for ten hours last night!"],
+smell:[1,"The kitchen ___ of fresh bread this morning."],speak:[2,"Have you ever ___ to a famous person?"],
+speed:[1,"The car ___ past us on the motorway."],spell:[1,"Oops! I ___ my name wrong on the form."],
+spend:[1,"We ___ the whole weekend at the beach."],spill:[2,"Oops! I've ___ juice on the carpet."],
+split:[1,"We ___ the pizza into eight pieces."],spoil:[1,"The rain ___ our picnic last Sunday."],
+spread:[1,"The news ___ quickly around the school."],stand:[1,"We ___ in the rain for an hour waiting for the bus."],
+steal:[2,"Someone has ___ my bike!"],stick:[1,"I ___ a photo of my family on the fridge."],
+strike:[1,"Lightning ___ the old tree during the storm."],sweep:[1,"Grandma ___ the floor after lunch."],
+swim:[2,"Have you ever ___ in the sea at night?"],swing:[1,"The monkey ___ from tree to tree."],
+take:[2,"Who has ___ my pencil case?"],teach:[1,"Mr Demir ___ us maths last year."],
+tear:[2,"Be careful! You've ___ your jacket."],tell:[1,"My friend ___ me a funny joke yesterday."],
+think:[1,"I ___ the test was easy. What about you?"],throw:[1,"He ___ the ball to his dog."],
+understand:[2,"Have you ___ the instructions?"],upset:[1,"His rude words ___ her a lot."],
+wake:[1,"The noise ___ me up at 3 a.m."],wear:[1,"She ___ a beautiful red dress to the party."],
+win:[2,"Our class has ___ the school quiz three times!"],wind:[1,"He ___ the old clock and it started to tick again."],
+withdraw:[1,"Because of an injury, the player ___ from the race."],write:[2,"Have you ever ___ a letter by hand?"]
+};
+// Bazı cümleler için elle seçilmiş yanlış şıklar
+const SENT_WRONG = {speed:["spedded","speeden","speeding"], prove:["proven","proving","prooved"], wind:["winded","winding","wounden"]};
+// Listedeki sayfalar (PDF): 1 = awake–go, 2 = grow–sing, 3 = sink–write
+const PAGE_OF = v => { const i=VERBS.findIndex(x=>x[0]===v); return i<=VERBS.findIndex(x=>x[0]==="go")?"p1": i<=VERBS.findIndex(x=>x[0]==="sing")?"p2":"p3"; };
 
 const POINTS = {1:500,2:1000,3:1500};
-const TIER_NAME = {1:"KOLAY",2:"ORTA",3:"ZOR"};
+const TIER_NAME = {1:"EASY",2:"MEDIUM",3:"HARD"};
 const SHAPES = [
  '<svg class="shape" viewBox="0 0 40 40"><polygon points="20,4 37,35 3,35" fill="#fff"/></svg>',
  '<svg class="shape" viewBox="0 0 40 40"><polygon points="20,2 38,20 20,38 2,20" fill="#fff"/></svg>',
@@ -2703,42 +2812,84 @@ function regular(b){
   if (dbl && !/[wxy]$/.test(b)) return b+b.at(-1)+"ed";
   return b+"ed";
 }
-function variants(f){
+// Öğrencilerin gerçekten karıştırdığı biçimler (zor çeldiriciler)
+const CONFUSE = {
+ bring:["bought","brang","brung"], buy:["brought","buyed"], think:["taught","thinked"], teach:["thought","teached"],
+ catch:["cought","catched"], fight:["fighted","foughted"], seek:["seeked","soughted"], lie:["laid","layed"], rise:["raised","rised"],
+ fall:["felled","feeled"], feel:["fell","feeled"], find:["founded","finded"], lead:["lead","leaded"], lose:["loosed","losed"],
+ fly:["flied","flowed"], swim:["swimmed","swammed"], win:["winned","wan"], read:["readed","red"], strike:["stroke","striked"],
+ stick:["stucked","sticked"], sweep:["sweeped","swep"], creep:["creeped","crep"], dig:["digged","dugged"], wear:["weared","wore"],
+ tear:["teared","tore"], see:["sawn","seed"], go:["goed","wented"], know:["knowed","knewn"], grow:["growed","grewn"],
+ throw:["throwed","threwn"], blow:["blowed","blewn"], draw:["drawed","drawen"], withdraw:["withdrawed","withdrawen"],
+ hang:["hunged","hanged"], wind:["wounden","wond"], shine:["shined","shinned"], spend:["spended","spented"], lend:["lended","lended"],
+ sell:["selled","sold"], tell:["telled","teld"], hold:["holded","helt"], hide:["hided","hidded"], bite:["bited","bitted"],
+ ride:["rided","rode"], write:["writed","wrote"], drive:["drived","driven"], beat:["beated","beatten"],
+ forbid:["forbidded","forbaded"], forgive:["forgived","forgaved"], awake:["awaked","awoked"], wake:["waked","waken"],
+ overcome:["overcomed","overcamed"], become:["becomed","becamed"], come:["comed","camed"], shake:["shaked","shooken"],
+ freeze:["freezed","frozed"], choose:["choosed","choosen"], speak:["speaked","spoked"], steal:["stealed","stoled"],
+ break:["breaked","broked"], take:["taked","tooken"], eat:["eated","ated"], give:["gived","gaved"], forget:["forgetted","forgoten"],
+ get:["getted","gotted"], do:["doed","did"], have:["haved","hadded"], say:["sayed","sayd"], pay:["payed","payd"], make:["maked","maded"],
+ meet:["meeted","metted"], mean:["meaned","ment"], deal:["dealed","delt"], leave:["leaved","lefted"], keep:["keeped","kepted"],
+ sleep:["sleeped","slepted"], feed:["feeded","fedded"], bleed:["bleeded","bledded"], shoot:["shooted","shotted"],
+ build:["builded","bilt"], burn:["burnd"], learn:["learnd"], dream:["dreamd"], spell:["speled"], spill:["spiled"], smell:["smeled"],
+ spoil:["spoilded"], lean:["leanded"], light:["litted","lited"], prove:["prooved","proofed"], speed:["speded","spedded"], sink:["sinked","sanked"],
+ shrink:["shrinked","shrinken"], sing:["singed","sanged"], ring:["ringed","ranged"], drink:["drinked","dranked"], begin:["beginned","begined"],
+ swing:["swinged","swang"], run:["runned","raned"], sit:["sitted","satted"], stand:["standed","stooded"], understand:["understanded","understooded"],
+ hear:["heared","herd"], send:["sended","sented"], cost:["costed","costet"], cut:["cutted","cuted"], hit:["hitted","hited"], put:["putted","puted"],
+ let:["letted","leted"], set:["setted","seted"], shut:["shutted","shuted"], quit:["quitted","quited"], bet:["betted","beted"], split:["splitted","splited"],
+ spread:["spreaded","spreaden"], burst:["bursted","bursten"], hurt:["hurted","hurten"], upset:["upsetted","upseted"], be:["been","wased"]
+};
+function spelling(f){ // yazım tuzakları
   const out=[];
-  const swap=(re,to)=>{ if(re.test(f)) out.push(f.replace(re,to)); };
-  const V=(v)=>new RegExp("(?<![aeiou])"+v+"(?![aeiou])(?=[^aeiou]+$)"); // tek ünlü, son hecede
-  if (!/ed$/.test(f)){
-    swap(V("i"),"a"); swap(V("i"),"u"); swap(V("a"),"u"); swap(V("u"),"a"); swap(V("e"),"o");
+  const m=f.match(/([bcdfgklmnprstz])\1(en|ed)?$/) || f.match(/([bcdfgklmnprstz])\1en$/);
+  if (/([bcdfgklmnprstz])\1en$/.test(f)) out.push(f.replace(/([bcdfgklmnprstz])\1en$/,"$1en"));   // written → writen
+  if (/[^aeiou][aeiou][bdgnt]en$/.test(f) && !/([bcdfgklmnprstz])\1en$/.test(f)) out.push(f.replace(/([bdgnt])en$/,"$1$1en")); // risen → rissen
+  if (/osen$/.test(f)) out.push(f.replace(/osen$/,"oosen"));   // chosen → choosen
+  if (/aught$/.test(f)) out.push(f.replace(/aught$/,"ought"));
+  if (/ought$/.test(f)) out.push(f.replace(/ought$/,"aught"));
+  if (/au/.test(f)) out.push(f.replace("au","ou"));             // caught → cought
+  if (/ew$/.test(f)) out.push(f.replace(/ew$/,"own"));
+  if (/own$/.test(f)) out.push(f.replace(/own$/,"ew"));
+  if (/ore$/.test(f)) out.push(f.replace(/ore$/,"orn"));
+  if (/orn$/.test(f)) out.push(f.replace(/orn$/,"ore"));
+  if (/oke$/.test(f)) out.push(f.replace(/oke$/,"oken"));
+  if (/oken$/.test(f)) out.push(f.replace(/oken$/,"oke"));
+  return out;
+}
+function variants(f,b){
+  const out=[...spelling(f)];
+  // i → a → u ailesi (drink-drank-drunk, swim-swam-swum…) sadece bu ailedeki fiillerde
+  if (b && /i[^aeiouyh]+$/.test(b) && !/igh/.test(b) && /^[^aeiou]*[aeiou][^aeiou]*$/.test(f)){
+    const V=v=>new RegExp("(?<![aeiou])"+v+"(?![aeiou])");
+    if (V("i").test(f)) out.push(f.replace(V("i"),"a"), f.replace(V("i"),"u"));
+    if (V("a").test(f)) out.push(f.replace(V("a"),"u"));
+    if (V("u").test(f)) out.push(f.replace(V("u"),"a"));
   }
-  swap(/ought$/,"aught"); swap(/aught$/,"ought"); swap(/ew$/,"own"); swap(/own$/,"ew"); swap(/ore$/,"orn"); swap(/orn$/,"ore");
-  swap(/oke$/,"oken"); swap(/oken$/,"oke"); swap(/ose$/,"osen"); swap(/ove$/,"oven"); swap(/oven$/,"ove");
-  swap(/ten$/,"t");
-  if (!/(ed|t|d|en)$/.test(f)) out.push(f.endsWith("e")? f+"d" : f+"ed");
   return out;
 }
 const ing = b => b.endsWith("ie")? b.slice(0,-2)+"ying" : (b.endsWith("e")&&!b.endsWith("ee"))? b.slice(0,-1)+"ing"
   : (/^[^aeiou]*[aeiou][bdgmnpt]$/.test(b)||["begin","forget","forbid","upset","quit"].includes(b))? b+b.at(-1)+"ing" : b+"ing";
 const third = b => /(s|sh|ch|x|o)$/.test(b)? b+"es" : /[^aeiou]y$/.test(b)? b.slice(0,-1)+"ies" : b==="have"?"has":b==="be"?"is":b+"s";
-function wrongForms(v, col){ // col 1=V2, 2=V3
-  const bad = VALID(v), base=v[0], target=forms(v[col])[0], other=forms(v[col===1?2:1])[0];
+function wrongForms(v, col){ // col 1=V2, 2=V3 — zordan kolaya sıralı
+  const bad = VALID(v), base=v[0], other=forms(v[col===1?2:1])[0];
   const good = new Set(forms(v[col]));
-  const irr = forms(v[col]).find(x=>!x.endsWith("ed")) || target;
+  const irr = forms(v[col]).find(x=>x!==regular(base)) || forms(v[col])[0];
   let c = [];
-  if (!good.has(other)) c.push(other);
-  if (!good.has(base)) c.push(base);
+  if (!good.has(other)) c.push(other);                 // V2 ↔ V3 karışıklığı
+  c.push(...(CONFUSE[base]||[]));                       // gerçek öğrenci hataları
+  c.push(...variants(irr, base));                       // yazım tuzakları
+  if (col===2) c.push(...variants(forms(v[1]).find(x=>x!==regular(base))||other, base));
   c.push(regular(base));
-  c.push(...shuffle(variants(irr)));
-  if (col===2) c.push(...variants(forms(v[1]).find(x=>!x.endsWith("ed"))||other));
-  c.push(ing(base), third(base));
+  if (!good.has(base)) c.push(base);
   c = c.filter(x => /^[a-z]{2,}$/.test(x) && !good.has(x) && !(bad.has(x) && x!==other && x!==base));
-  c = [...new Set(c)];
-  return c;
+  return [...new Set(c)];
 }
 function pickWrong(v,col,n=3){
   const c = wrongForms(v,col);
-  // ilk 2 güçlü çeldirici + karışık
-  const strong=c.slice(0,2), rest=shuffle(c.slice(2));
-  let out=[...new Set([...strong,...rest])].slice(0,n);
+  // en güçlü iki çeldirici + kalanlardan biri
+  let out=[...new Set([...c.slice(0,2),...shuffle(c.slice(2,5))])].slice(0,n);
+  const pads=[ing(v[0]), third(v[0])].filter(x=>!out.includes(x) && !VALID(v).has(x));
+  while(out.length<n && pads.length) out.push(pads.shift());
   while(out.length<n){ const o=forms(rnd(VERBS)[col])[0]; if(!out.includes(o)&&!VALID(v).has(o)) out.push(o); }
   return out;
 }
@@ -2763,6 +2914,24 @@ function makeQ(v,type){
     const sim = shuffle(others.filter(x=> (forms(x[1])[0].endsWith(tail)||forms(x[2])[0].endsWith(tail)) ));
     const same1 = shuffle(others.filter(x=>x[0][0]===b[0]));
     wrong=[...new Set([...sim.slice(0,2),...same1,...shuffle(others)].map(x=>x[0]))].slice(0,3);
+  } else if (type==="sent"){
+    const [col,sen,only] = SENT[b];
+    if (col===2 && v2!==v3 && t<3) tier=t+1;
+    p1="Complete the sentence."; verb=sen; p2="( "+b+" )";
+    correct = only || disp(v[col]);
+    // cümlede dilbilgisi olarak doğru olabilecek biçimleri (geniş zaman, -s, -ing) şık yapma
+    const irrF = forms(v[col]).find(x=>x!==regular(b)) || forms(v[col])[0];
+    const otherF = forms(v[col===1?2:1])[0];
+    const banned = new Set([...(col===1? [b, third(b)]:[]), ...(only? forms(v[col]):[])]);
+    let c = wrongForms(v,col).filter(x=>!banned.has(x));
+    const more = [...variants(irrF,b), regular(b), ...variants(forms(v[col===1?2:1])[0],b)]
+      .filter(x=>/^[a-z]{2,}$/.test(x) && !banned.has(x) && !VALID(v).has(x));
+    c=[...new Set([...c,...more, ing(b), irrF+(irrF.endsWith("e")?"d":"ed"), irrF.replace(/e?$/,"en")])].filter(x=>!banned.has(x) && (!VALID(v).has(x) || (x===otherF && !forms(v[col]).includes(x)) || (only && x!==only && forms(v[col]).includes(x))));
+    if (!only && otherF && !forms(v[col]).includes(otherF) && !banned.has(otherF)) c=[otherF,...c.filter(x=>x!==otherF)]; // V2↔V3 karışıklığı en güçlü çeldirici
+    if (only){ forms(v[col]).filter(x=>x!==only).forEach(x=>c.unshift(x)); } // was ↔ were
+    if (SENT_WRONG[b]) c=[...SENT_WRONG[b]];
+    c=c.filter(x=>!(irrF===regular(b) && (x===irrF+"ed"||x===irrF.replace(/e?$/,"en"))));
+    wrong=[...new Set(c)].filter(x=>x!==correct).slice(0,3);
   } else { // triple
     tier=Math.max(t,2);
     p1="Which one is correct?"; verb=b; p2="V1 – V2 – V3";
@@ -2782,26 +2951,45 @@ function makeQ(v,type){
   const options = shuffle([correct,...wrong]);
   return {verb:b,type,tier,p1,word:verb,p2,options,correct:options.indexOf(correct)};
 }
+const MIXW = {easy:{1:.6,2:.3,3:.1}, mixed:{1:.4,2:.35,3:.25}, hard:{1:.2,2:.35,3:.45}};
+function verbsFor(cfg){
+  const tricky = new Set(cfg.range.includes("tricky")? trickyVerbs(cfg.cls).map(x=>x.v) : []);
+  return VERBS.filter(v=> cfg.range.includes(PAGE_OF(v[0])) || tricky.has(v[0]));
+}
+function okType(v,tp){ return !(tp==="base" && forms(v[1]).every(f=>f===v[0]) && forms(v[2]).every(f=>f===v[0])); }
+function pickQ(cfg, used){
+  const W = MIXW[cfg.mix];
+  const pool=[];
+  verbsFor(cfg).forEach(v=>{ if(used.has(v[0])) return; cfg.types.forEach(tp=>{ if(!okType(v,tp)) return;
+    const q=makeQ(v,tp); q.w=W[q.tier]*(tp==="v2"&&forms(v[1])[0]===v[0]?0.4:1); pool.push(q); }); });
+  const tot=pool.reduce((a,q)=>a+q.w,0); if(!tot) return null;
+  let r=Math.random()*tot; for(const q of pool){ r-=q.w; if(r<=0) return q; } return pool.at(-1);
+}
 function buildGame(cfg){
-  const W = {easy:{1:.6,2:.3,3:.1}, mixed:{1:.4,2:.35,3:.25}, hard:{1:.2,2:.35,3:.45}}[cfg.mix];
-  const pool = [];
-  VERBS.forEach(v=> cfg.types.forEach(tp=>{
-    if (tp==="base" && forms(v[1]).every(f=>f===v[0]) && forms(v[2]).every(f=>f===v[0])) return; // cut-cut-cut
-    const q = makeQ(v,tp); q.w = W[q.tier]*(tp==="v2"&&forms(v[1])[0]===v[0]?0.4:1); pool.push(q);
-  }));
   const picked=[], used=new Set();
-  let guard=0;
-  while(picked.length<cfg.count && guard++<5000){
-    const tot=pool.reduce((s,q)=>s+(used.has(q.verb)?0:q.w),0); if(!tot) break;
-    let r=Math.random()*tot, q;
-    for(q of pool){ if(used.has(q.verb)) continue; r-=q.w; if(r<=0) break; }
-    used.add(q.verb); picked.push(q);
-  }
+  while(picked.length<cfg.count){ const q=pickQ(cfg,used); if(!q) break; used.add(q.verb); picked.push(q); }
   // kolaydan zora hafif yükselen sıra
   picked.forEach(q=>q.k=q.tier+Math.random()*1.8);
   picked.sort((a,b)=>a.k-b.k);
-  picked.at(-1).final = true;
+  markFinal(picked);
   return picked;
+}
+function markFinal(qs){ qs.forEach(q=>q.final=false); if(qs.length) qs.at(-1).final=true; }
+
+/* ---- sınıf hata defteri (tahta bilgisayarında saklanır) ---- */
+const HKEY = c => "iv_hist_"+String(c||"").trim().toUpperCase();
+function loadHist(c){ try{ return JSON.parse(localStorage.getItem(HKEY(c)))||{}; }catch(e){ return {}; } }
+function trickyVerbs(c){
+  if(!String(c||"").trim()) return [];
+  const h=loadHist(c);
+  return Object.entries(h).filter(([v,x])=>x.asked>=2 && x.wrong/x.asked>=0.3)
+    .map(([v,x])=>({v,rate:x.wrong/x.asked,asked:x.asked})).sort((a,b)=>b.rate-a.rate).slice(0,15);
+}
+function saveHist(c, stats){
+  if(!String(c||"").trim()) return;
+  const h=loadHist(c);
+  stats.forEach(s=>{ const e=h[s.q.verb]||(h[s.q.verb]={asked:0,wrong:0}); e.asked+=s.total; e.wrong+=s.total-s.right; });
+  try{ localStorage.setItem(HKEY(c),JSON.stringify(h)); }catch(e){}
 }
 
 /* ============================================================
@@ -2831,7 +3019,22 @@ const Sound = {
 async function hostApp(){
   $("hostBar").classList.remove("hidden");
   show("setup");
-  const cfg = {count:15,time:20,mix:"mixed",types:["v2","v3","base","triple"]};
+  const cfg = {count:40,time:20,mix:"hard",types:["v2","v3","base","triple","sent"],range:["p1","p2","p3"],cls:""};
+  try{ cfg.cls = localStorage.getItem("iv_last_class")||""; }catch(e){}
+  $("inClass").value=cfg.cls;
+  const refreshTricky=()=>{
+    const t=trickyVerbs(cfg.cls);
+    $("chipTricky").classList.toggle("hidden",!t.length);
+    if(!t.length){ $("chipTricky").classList.remove("on"); cfg.range=cfg.range.filter(x=>x!=="tricky"); if(!cfg.range.length){cfg.range=["p1","p2","p3"]; document.querySelectorAll('[data-key=range] .chip').forEach(c=>c.classList.toggle("on",c.dataset.v!=="tricky"));} }
+    $("trickyInfo").classList.toggle("hidden",!t.length);
+    $("trickyInfo").textContent = t.length? "⚠ "+cfg.cls.toUpperCase()+" tricky verbs so far: "+t.map(x=>x.v).join(", ") : "";
+  };
+  $("inClass").addEventListener("input",()=>{ cfg.cls=$("inClass").value.trim(); try{localStorage.setItem("iv_last_class",cfg.cls);}catch(e){} refreshTricky(); });
+  refreshTricky();
+  const est=()=>{ const n=Math.min(cfg.count, verbsFor(cfg).length); const per=3+0.75*cfg.time+18; // giriş + cevap + sonuç/sıralama (sn)
+    const mins=Math.round((n*per)/60); $("estTime").textContent="≈ "+mins+" min of play"+(n<cfg.count?` (only ${n} verbs in the selected pages)`:"")+" + ~3 min to join + ~3 min Second chance"; };
+  document.querySelectorAll("#setup .chips").forEach(b=>b.addEventListener("click",()=>setTimeout(est,0)));
+  est();
   document.querySelectorAll("#setup .chips").forEach(box=>{
     box.addEventListener("click",e=>{
       const b=e.target.closest(".chip"); if(!b) return; const key=box.dataset.key;
@@ -2843,29 +3046,44 @@ async function hostApp(){
         cfg[key]= isNaN(b.dataset.v)? b.dataset.v : +b.dataset.v; }
     });
   });
-  $("bSound").onclick=()=>{ Sound.on=!Sound.on; $("bSound").textContent=Sound.on?"🔊 Ses":"🔇 Ses"; if(!Sound.on)Sound.stop(); };
+  $("bSound").onclick=()=>{ Sound.on=!Sound.on; $("bSound").textContent=Sound.on?"🔊 Sound":"🔇 Sound"; if(!Sound.on)Sound.stop(); };
   $("bFull").onclick=()=>{ document.fullscreenElement? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); };
 
   const ok = await initDB();
   if (!ok){ $("cfgWarn").classList.remove("hidden");
-    $("cfgWarn").innerHTML="<b>Canlı bağlantı henüz ayarlanmadı.</b> Dosyanın başındaki <code>FIREBASE_CONFIG</code> kısmına Firebase bilgileri girilmeli. "+
-      "Denemek için adresin sonuna <code>?mock=1</code> ekleyip öğrenci ekranını aynı bilgisayarda başka sekmede açabilirsiniz.";
+    $("cfgWarn").innerHTML="<b>Live connection is not set up.</b> Add the Firebase settings to <code>FIREBASE_CONFIG</code>. "+
+      "To try it offline, add <code>?mock=1</code> to the address.";
     $("bOpen").disabled=true; return; }
 
+  let pre=null; // önizlenen soru seti
+  const renderPreview=()=>{
+    $("pvList").innerHTML = pre.map((q,i)=>`<li><span class="n">${i+1}</span><div class="qq"><div class="qt">${esc([q.p1,q.word,q.p2].filter(Boolean).join(" "))}
+      <span class="tag">${q.final?"🔥 final 2x · ":""}${TIER_NAME[q.tier]} · ${({v2:"V2",v3:"V3",base:"which verb",triple:"V1–V2–V3",sent:"sentence"})[q.type]}</span></div>
+      <div class="op">${q.options.map((o,j)=>j===q.correct?`<b>${esc(o)}</b>`:esc(o)).join(" &nbsp;·&nbsp; ")}</div></div>
+      <div class="act"><button data-a="swap" data-i="${i}" title="Replace with another question">↻ Change</button><button data-a="del" data-i="${i}" title="Remove this question">✕</button></div></li>`).join("");
+  };
+  $("pvList").onclick=e=>{ const b=e.target.closest("button"); if(!b) return; const i=+b.dataset.i;
+    if(b.dataset.a==="del"){ if(pre.length<=1) return; pre.splice(i,1); }
+    else { const used=new Set(pre.map(q=>q.verb)); const q=pickQ(cfg,used); if(!q){ alert("No more verbs left in the selected pages."); return; } q.k=pre[i].k; pre[i]=q; }
+    markFinal(pre); renderPreview(); };
+  $("bPrev").onclick=()=>{ pre=buildGame(cfg); renderPreview(); show("preview"); };
+  $("bPvNew").onclick=()=>{ pre=buildGame(cfg); renderPreview(); };
+  $("bPvBack").onclick=()=>{ pre=null; show("setup"); };
+  $("bPvOpen").onclick=()=>{ Sound.init(); openRoom(cfg, pre); };
   $("bOpen").onclick=()=>{ Sound.init(); openRoom(cfg); };
 }
 
 let G; // oyun durumu
-async function openRoom(cfg){
+async function openRoom(cfg, preset){
   // eski odayı temizle
   const old = localStorage.getItem("iv_host_pin"); if(old) DB.remove("rooms/"+old).catch(()=>{});
   let pin; for(let i=0;i<10;i++){ pin=String(Math.floor(100000+Math.random()*900000)); if(!(await DB.get("rooms/"+pin+"/state"))) break; }
   localStorage.setItem("iv_host_pin",pin);
-  G = {pin,cfg,qs:buildGame(cfg),i:-1,players:{},answers:{},stats:{},unsubA:null,timer:null,phase:"lobby"};
+  window.__G = G = {pin,cfg,qs:preset||buildGame(cfg),i:-1,players:{},answers:{},stats:{},unsubA:null,timer:null,phase:"lobby"};
   await DB.set("rooms/"+pin, {created:SERVER_TS, state:{phase:"lobby"}});
   const url = location.origin+location.pathname+"?pin="+pin+(MOCK?"&mock=1":"");
   $("pin").textContent = pin.slice(0,3)+" "+pin.slice(3);
-  $("joinUrl").textContent = (location.host||"(yerel dosya)")+location.pathname.replace(/index\.html$/,"");
+  $("joinUrl").textContent = (location.host||"(local file)")+location.pathname.replace(/index\.html$/,"");
   const qr = qrcode(0,"M"); qr.addData(url); qr.make(); $("qr").innerHTML = qr.createSvgTag({cellSize:6,margin:2,scalable:true});
   $("qr").title=url;
   show("lobby"); Sound.lobby();
@@ -2889,10 +3107,10 @@ async function openRoom(cfg){
 function renderLobby(){
   const box=$("players"); box.innerHTML="";
   const ids=Object.keys(G.players);
-  ids.forEach(id=>{ const d=document.createElement("div"); d.className="pchip"; d.textContent=G.players[id].name; d.title="Çıkarmak için tıklayın";
-    d.onclick=()=>{ if(confirm(G.players[id].name+" oyundan çıkarılsın mı?")) DB.remove("rooms/"+G.pin+"/players/"+id); }; box.appendChild(d); });
+  ids.forEach(id=>{ const d=document.createElement("div"); d.className="pchip"; d.textContent=G.players[id].name; d.title="Click to remove";
+    d.onclick=()=>{ if(confirm("Remove "+G.players[id].name+" from the game?")) DB.remove("rooms/"+G.pin+"/players/"+id); }; box.appendChild(d); });
   $("pCount").textContent=ids.length; $("bStart").disabled=!ids.length;
-  $("waitMsg").textContent = ids.length? "Herkes hazır olunca Başla'ya basın" : "Öğrenciler bekleniyor…";
+  $("waitMsg").textContent = ids.length? "Press Start when everyone is in" : "Waiting for players…";
 }
 function onNext(){
   if (!G) return;
@@ -2901,16 +3119,20 @@ function onNext(){
   else if (G.phase==="reveal") { if (G.i===G.qs.length-1) showFinal(); else showLeaderboard(); }
   else if (G.phase==="leaderboard") nextQuestion();
 }
+function qNumInfo(){ const sc=G.secondStart;
+  if(sc!=null && G.i>=sc) return {num:G.i-sc+1, of:G.qs.length-sc, second:true};
+  return {num:G.i+1, of: sc!=null? sc : G.qs.length, second:false}; }
 function qState(extra){ const q=G.qs[G.i];
-  return Object.assign({q:G.i,total:G.qs.length,tier:q.tier,pts:POINTS[q.tier]*(q.final?2:1),final:!!q.final,type:q.type,options:q.options,dur:G.cfg.time},extra); }
+  return Object.assign({q:G.i,...qNumInfo(),total:G.qs.length,tier:q.tier,pts:POINTS[q.tier]*(q.final?2:1),final:!!q.final,type:q.type,options:q.options,dur:G.cfg.time},extra); }
 
 function nextQuestion(){
   G.i++; const q=G.qs[G.i]; G.answers={}; G.phase="intro";
   show("hq"); $("bNext").classList.add("hidden");
-  $("qNum").textContent=(G.i+1)+" / "+G.qs.length;
-  const b=$("qBadge"); b.className="badge t"+q.tier+(q.final?" final":"");
-  b.textContent = q.final ? "🔥 FİNAL · 2x · "+POINTS[q.tier]*2 : TIER_NAME[q.tier]+" · "+POINTS[q.tier];
+  const ni=qNumInfo(); $("qNum").textContent=(ni.second?"🔁 ":"")+ni.num+" / "+ni.of;
+  const b=$("qBadge"); b.className="badge t"+q.tier+(q.final?" final":"")+(q.second?" second":"");
+  b.textContent = q.final ? "🔥 FINAL · 2x · "+POINTS[q.tier]*2 : (q.second?"🔁 SECOND CHANCE · ":"")+TIER_NAME[q.tier]+" · "+POINTS[q.tier];
   $("qP1").textContent=q.p1; $("qVerb").textContent=q.word; $("qP2").textContent=q.p2;
+  $("qVerb").classList.toggle("sentence", q.type==="sent");
   $("qP1").classList.toggle("hidden",!q.p1);
   $("qOpts").innerHTML=""; $("qOpts").style.visibility="hidden";
   $("qMid").style.visibility="visible";
@@ -2926,7 +3148,7 @@ function startQuestion(){
   $("qCenter").innerHTML=""; $("qTimer").classList.remove("low"); $("qTimer").style.visibility="visible"; $("qAns").parentElement.style.visibility="visible";
   const opts=$("qOpts"); opts.style.visibility="visible";
   opts.innerHTML = q.options.map((o,i)=>`<div class="opt c${i}">${SHAPES[i]}<span>${esc(o)}</span></div>`).join("");
-  $("bNext").classList.remove("hidden"); $("bNext").textContent="Süreyi bitir ⏭";
+  $("bNext").classList.remove("hidden"); $("bNext").textContent="Skip ⏭";
   G.startAt = DB.now();
   DB.set("rooms/"+G.pin+"/state", qState({phase:"question",startAt:G.startAt}));
   Sound.thinking();
@@ -2985,7 +3207,7 @@ function endQuestion(){
   $("qCenter").innerHTML='<div class="bars">'+counts.map((c,i)=>`<div class="bar c${i}">${c}${i===q.correct?" ✔":""}<i style="height:0"></i></div>`).join("")+'</div>';
   requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll(".bar i").forEach((el,i)=>el.style.height=(8+counts[i]/max*80)+"%"),30));
   document.querySelectorAll(".opt").forEach((el,i)=>{ if(i===q.correct){el.classList.add("right"); el.insertAdjacentHTML("beforeend",'<span class="tick">✔</span>');} else el.classList.add("dim"); });
-  $("bNext").textContent = G.i===G.qs.length-1? "Sonuçlar 🏆" : "Sıralama ▶";
+  $("bNext").textContent = G.i===G.qs.length-1? "Results 🏆" : "Scoreboard ▶";
 }
 function rank(){ return Object.entries(G.players).map(([id,p])=>({id,...p})).sort((a,b)=>b.score-a.score); }
 function showLeaderboard(){
@@ -2993,22 +3215,48 @@ function showLeaderboard(){
   DB.set("rooms/"+G.pin+"/state", qState({phase:"leaderboard"}));
   const r=rank().slice(0,5);
   $("lbList").innerHTML = r.map((p,i)=>`<div class="lbRow" style="animation-delay:${i*.08}s"><span class="r">${i+1}</span><span class="nm">${esc(p.name)}</span>${p.streak>=2?`<span class="st">🔥${p.streak}</span>`:""}<span>${p.score}</span></div>`).join("");
-  $("bNext2").textContent = G.i===G.qs.length-2 ? "🔥 Final sorusu ▶" : "Sonraki soru ▶";
+  const nx=G.qs[G.i+1]; $("bNext2").textContent = nx&&nx.final ? "🔥 Final question ▶" : "Next question ▶";
 }
 function showFinal(){
-  G.phase="final"; show("final");
+  G.phase="final"; show("final"); 
   const r=rank();
   DB.set("rooms/"+G.pin+"/state", {phase:"final",total:G.qs.length});
   [1,2,3].forEach(n=>{ const p=r[n-1]; $("pod"+n).innerHTML = p? `${esc(p.name)}<div class="sc">${p.score}</div>` : ""; });
-  const miss = Object.values(G.stats).filter(s=>s.total).map(s=>({s,pct:Math.round(100*s.right/s.total)})).sort((a,b)=>a.pct-b.pct).slice(0,5);
-  $("missed").innerHTML = miss.map(m=>{ const v=VERBS.find(x=>x[0]===m.s.q.verb);
-     return `<li><span>${esc(v[0]+" – "+disp(v[1])+" – "+disp(v[2]))}</span><span>%${m.pct} doğru</span></li>`; }).join("") || "<li>—</li>";
+  const sc=G.secondStart, pct=s=>Math.round(100*s.right/s.total);
+  const mainStats = Object.entries(G.stats).filter(([i,s])=>s.total && (sc==null || +i<sc)).map(([i,s])=>s);
+  if(!G.histSaved){ saveHist(G.cfg.cls, mainStats); G.histSaved=true; }
+  const missBox=$("missed"), h3=missBox.previousElementSibling;
+  if(sc==null){
+    h3.textContent="😬 Trickiest verbs";
+    const miss = mainStats.map(s=>({s,pct:pct(s)})).sort((a,b)=>a.pct-b.pct).slice(0,5);
+    missBox.className="";
+    missBox.innerHTML = miss.map(m=>{ const v=VERBS.find(x=>x[0]===m.s.q.verb);
+       return `<li><span>${esc(v[0]+" – "+disp(v[1])+" – "+disp(v[2]))}</span><span>${m.pct}% correct</span></li>`; }).join("") || "<li>—</li>";
+  } else {
+    h3.textContent="🔁 Second chance results";
+    missBox.className="improve";
+    missBox.innerHTML = Object.entries(G.stats).filter(([i,s])=>+i>=sc && s.total).map(([i,s])=>{ const v=VERBS.find(x=>x[0]===s.q.verb);
+       return `<li><span>${esc(v[0]+" – "+disp(v[1])+" – "+disp(v[2]))}</span><span>${s.q.origPct}% → ${pct(s)}% ${pct(s)>s.q.origPct?"✔":""}</span></li>`; }).join("");
+  }
+  const weak = mainStats.filter(s=>pct(s)<100).sort((a,b)=>pct(a)-pct(b)).slice(0,5);
+  $("bSecond").classList.toggle("hidden", sc!=null || !weak.length);
+  $("bSecond").textContent = "🔁 Second chance ("+weak.length+" verb"+(weak.length>1?"s":"")+")";
+  $("bSecond").onclick=()=>startSecondChance(weak);
   Sound.fanfare(); setTimeout(confetti,2300);
-  $("bFullLb").onclick=()=>{ G.phase="final-lb"; show("lb"); $("lbList").innerHTML=r.map((p,i)=>`<div class="lbRow"><span class="r">${i+1}</span><span class="nm">${esc(p.name)}</span><span class="st">${p.correct}/${G.qs.length} ✔</span><span>${p.score}</span></div>`).join(""); $("bNext2").textContent="◀ Podyum"; $("bNext2").onclick=()=>{ show("final"); G.phase="final"; $("bNext2").onclick=()=>onNext(); }; };
-  $("bCsv").onclick=()=>{ const rows=[["Sıra","Ad","Puan","Doğru","Soru"],...r.map((p,i)=>[i+1,p.name,p.score,p.correct,G.qs.length])];
-    const csv="﻿"+rows.map(x=>x.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
-    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="irregular-verbs-sonuclar.csv"; a.click(); };
+  const total=G.qs.length;
+  $("bFullLb").onclick=()=>{ G.phase="final-lb"; show("lb"); $("lbList").innerHTML=r.map((p,i)=>`<div class="lbRow"><span class="r">${i+1}</span><span class="nm">${esc(p.name)}</span><span class="st">${p.correct}/${total} ✔</span><span>${p.score}</span></div>`).join(""); $("bNext2").textContent="◀ Podium"; $("bNext2").onclick=()=>{ show("final"); G.phase="final"; $("bNext2").onclick=()=>onNext(); }; };
+  $("bCsv").onclick=()=>{ const rows=[["Rank","Name","Score","Correct","Questions"],...r.map((p,i)=>[i+1,p.name,p.score,p.correct,total])];
+    const csv="\ufeff"+rows.map(x=>x.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="irregular-verbs-results.csv"; a.click(); };
   $("bAgain").onclick=()=>{ DB.remove("rooms/"+G.pin); location.reload(); };
+}
+function startSecondChance(weak){
+  const ORDER=["triple","sent","v3","v2","base"];
+  const qs = weak.map(s=>{ const v=VERBS.find(x=>x[0]===s.q.verb);
+    const types=ORDER.filter(t=>t!==s.q.type && okType(v,t));
+    const q=makeQ(v, types[0]); q.second=true; q.origPct=Math.round(100*s.right/s.total); return q; });
+  G.secondStart=G.qs.length; G.qs.push(...qs);
+  nextQuestion();
 }
 function confetti(){
   const c=$("confetti"); c.classList.remove("hidden"); const x=c.getContext("2d"); c.width=innerWidth; c.height=innerHeight;
@@ -3024,7 +3272,7 @@ function confetti(){
 async function playerApp(){
   show("pJoin");
   const ok = await initDB();
-  if(!ok){ $("joinErr").textContent="Oyun bağlantısı ayarlanmamış."; return; }
+  if(!ok){ $("joinErr").textContent="The game is not set up yet."; return; }
   const pin0 = (params.get("pin")||"").replace(/\D/g,"");
   if (pin0){ $("inPin").value=pin0; $("inPin").classList.add("hidden"); setTimeout(()=>$("inName").focus(),200); }
   // önceki kimlikle geri dön (sayfa yenilenirse)
@@ -3033,20 +3281,20 @@ async function playerApp(){
   const go=async()=>{
     const pin=$("inPin").value.replace(/\D/g,""), name=$("inName").value.trim().replace(/\s+/g," ");
     $("joinErr").textContent="";
-    if(pin.length!==6) return $("joinErr").textContent="PIN 6 haneli olmalı";
-    if(name.length<2) return $("joinErr").textContent="Takma adını yaz (en az 2 harf)";
+    if(pin.length!==6) return $("joinErr").textContent="The PIN has 6 digits";
+    if(name.length<2) return $("joinErr").textContent="Type a nickname (at least 2 letters)";
     $("bJoin").disabled=true;
     try{
       const st=await DB.get(`rooms/${pin}/state`);
-      if(!st){ $("joinErr").textContent="Bu PIN'le oyun bulunamadı"; return; }
-      if(st.phase!=="lobby"){ $("joinErr").textContent="Oyun başladı, bir sonraki oyunu bekle 🙂"; return; }
+      if(!st){ $("joinErr").textContent="No game found with this PIN"; return; }
+      if(st.phase!=="lobby"){ $("joinErr").textContent="The game has already started. Wait for the next one 🙂"; return; }
       const ps=await DB.get(`rooms/${pin}/players`)||{};
-      if(Object.values(ps).some(p=>p.name.toLowerCase()===name.toLowerCase())){ $("joinErr").textContent="Bu ad alınmış, başka bir ad seç"; return; }
+      if(Object.values(ps).some(p=>p.name.toLowerCase()===name.toLowerCase())){ $("joinErr").textContent="This nickname is taken. Choose another one"; return; }
       const id="p"+Math.random().toString(36).slice(2,10);
       await DB.set(`rooms/${pin}/players/${id}`,{name,joined:SERVER_TS});
       localStorage.setItem("iv_p_"+pin,JSON.stringify({id,name}));
       enter(pin,id,name);
-    } catch(e){ $("joinErr").textContent="Bağlantı hatası, tekrar dene"; }
+    } catch(e){ $("joinErr").textContent="Connection error. Try again"; }
     finally{ $("bJoin").disabled=false; }
   };
   $("bJoin").onclick=go; $("inName").addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
@@ -3054,10 +3302,10 @@ async function playerApp(){
 function enter(pin,id,name){
   const P={pin,id,name,state:null,me:null,answeredQ:-1,shownRes:-1};
   $("pTag").classList.remove("hidden"); $("pTagName").textContent=name; $("pTagScore").textContent="0";
-  show("pWait"); $("pWaitMsg").textContent="Oyundasın! 🎉"; $("pWaitSub").textContent="Adını tahtada görüyor musun?";
+  show("pWait"); $("pWaitMsg").textContent="You're in! 🎉"; $("pWaitSub").textContent="Can you see your name on the board?";
   if(navigator.wakeLock) navigator.wakeLock.request("screen").catch(()=>{});
   DB.on(`rooms/${pin}/players/${id}`, me=>{
-    if(!me){ show("pWait"); $("pTag").classList.add("hidden"); $("pWaitMsg").textContent="Oyundan çıkarıldın 😕"; $("pWaitSub").textContent="Öğretmenine sor."; localStorage.removeItem("iv_p_"+pin); P.gone=true; return; }
+    if(!me){ show("pWait"); $("pTag").classList.add("hidden"); $("pWaitMsg").textContent="You were removed from the game 😕"; $("pWaitSub").textContent="Ask your teacher."; localStorage.removeItem("iv_p_"+pin); P.gone=true; return; }
     P.me=me; if(me.last) { $("pTagScore").textContent=me.last.score; $("pScore").textContent=me.last.score; }
     render(P);
   });
@@ -3068,13 +3316,13 @@ function render(P){
   const me=P.me||{}, last=me.last;
   if (st.phase==="lobby"){ show("pWait"); $("pTag").classList.remove("hidden"); return; }
   if (st.phase==="intro"){ show("pWait"); $("pTag").classList.remove("hidden");
-    $("pWaitMsg").innerHTML = (st.final?"🔥 FİNAL SORUSU!<br>2x puan":"Soru "+(st.q+1)+" geliyor…")+"<br><span style='font-size:.8em'>"+TIER_NAME[st.tier]+" · "+st.pts+" puan</span>";
-    $("pWaitSub").textContent="Tahtaya bak 👀"; return; }
+    $("pWaitMsg").innerHTML = (st.final?"🔥 FINAL QUESTION!<br>2x points":(st.second?"🔁 Second chance!<br>":"")+"Question "+(st.num||st.q+1)+" is coming…")+"<br><span style='font-size:.8em'>"+TIER_NAME[st.tier]+" · "+st.pts+" points</span>";
+    $("pWaitSub").textContent="Look at the board 👀"; return; }
   if (st.phase==="question"){
-    if (P.answeredQ===st.q){ show("pWait"); $("pWaitMsg").textContent="Cevabın gönderildi ✔"; $("pWaitSub").textContent="Bakalım doğru mu… 🤞"; return; }
+    if (P.answeredQ===st.q){ show("pWait"); $("pWaitMsg").textContent="Answer sent ✔"; $("pWaitSub").textContent="Fingers crossed… 🤞"; return; }
     if (P.renderedQ===st.q && !$("pPlay").classList.contains("hidden")) return;
     P.renderedQ=st.q; show("pPlay"); $("pTag").classList.add("hidden");
-    $("pQn").textContent=(st.q+1)+"/"+st.total; $("pTier").textContent=(st.final?"🔥 2x ":"")+TIER_NAME[st.tier];
+    $("pQn").textContent=(st.second?"🔁 ":"")+(st.num||st.q+1)+"/"+(st.of||st.total); $("pTier").textContent=(st.final?"🔥 2x ":"")+TIER_NAME[st.tier];
     const box=$("pBtns"); box.className="pBtns"+(st.type==="triple"?" triple":"");
     box.innerHTML=st.options.map((o,i)=>`<button class="pBtn c${i}" data-i="${i}">${SHAPES[i]}<span>${esc(o)}</span></button>`).join("");
     box.querySelectorAll(".pBtn").forEach(b=>b.onclick=()=>{
@@ -3087,29 +3335,30 @@ function render(P){
   }
   if (st.phase==="reveal"){
     $("pTag").classList.add("hidden");
-    if (!last || last.q!==st.q){ show("pWait"); $("pWaitMsg").textContent="Sonuç geliyor…"; $("pWaitSub").textContent=""; return; }
+    if (!last || last.q!==st.q){ show("pWait"); $("pWaitMsg").textContent="Results are coming…"; $("pWaitSub").textContent=""; return; }
     const R=$("pRes"); show("pRes");
-    if (last.ok){ R.className="result ok"; R.innerHTML=`<div class="icon">✅</div><div class="big">Doğru!</div><div class="gain">+${last.pts}</div>
-      <div class="info">${last.streak>=2?"🔥 "+last.streak+" seri! (+"+(last.bonus*(st.final?2:1))+" bonus)<br>":""}${rankLine(last)}</div>`; }
-    else { R.className="result no"; R.innerHTML=`<div class="icon">${last.answered?"❌":"⏰"}</div><div class="big">${last.answered?"Yanlış":"Süre doldu"}</div>
-      <div class="gain">Doğrusu: ${esc(st.answer)}</div><div class="info">${rankLine(last)}</div>`; }
+    if (last.ok){ R.className="result ok"; R.innerHTML=`<div class="icon">✅</div><div class="big">Correct!</div><div class="gain">+${last.pts}</div>
+      <div class="info">${last.streak>=2?"🔥 "+last.streak+" in a row! (+"+(last.bonus*(st.final?2:1))+" bonus)<br>":""}${rankLine(last)}</div>`; }
+    else { R.className="result no"; R.innerHTML=`<div class="icon">${last.answered?"❌":"⏰"}</div><div class="big">${last.answered?"Wrong":"Time's up"}</div>
+      <div class="gain">Answer: ${esc(st.answer)}</div><div class="info">${rankLine(last)}</div>`; }
     if (P.shownRes!==st.q && navigator.vibrate) navigator.vibrate(last.ok?[60,40,60]:200);
     P.shownRes=st.q; return;
   }
   if (st.phase==="leaderboard"){
     show("pWait"); $("pTag").classList.remove("hidden");
-    $("pWaitMsg").innerHTML = last? `<div class="rankBig">${last.rank}.</div>sıradasın · ${last.score} puan` : "Sıralama tahtada";
-    $("pWaitSub").textContent = last&&last.behind? `${last.behind.name} seni ${last.behind.gap} puanla geçiyor! 💪` : last&&last.rank===1? "Zirvedesin! 👑":"";
+    $("pWaitMsg").innerHTML = last? `<div class="rankBig">${ord(last.rank)}</div>place · ${last.score} points` : "See the board";
+    $("pWaitSub").textContent = last&&last.behind? (last.behind.gap? `${last.behind.gap} points behind ${last.behind.name}! 💪` : `Tied with ${last.behind.name}! 💪`) : last&&last.rank===1? "You're on top! 👑":"";
     return;
   }
   if (st.phase==="final"){
     show("pWait"); $("pTag").classList.remove("hidden"); document.querySelector("#pWait .spinner").classList.add("hidden");
     const medal = last? (["🥇","🥈","🥉"][last.rank-1]||"🎉") : "🎉";
-    $("pWaitMsg").innerHTML = last? `<div style="font-size:4rem">${medal}</div><div class="rankBig">${last.rank}.</div>${last.score} puan` : "Oyun bitti!";
-    $("pWaitSub").textContent="Tebrikler! Tahtaya bak 🏆";
+    $("pWaitMsg").innerHTML = last? `<div style="font-size:4rem">${medal}</div><div class="rankBig">${ord(last.rank)}</div>${last.score} points` : "Game over!";
+    $("pWaitSub").textContent="Well done! Look at the board 🏆";
   }
 }
-function rankLine(l){ return `${l.rank}. sıradasın` + (l.behind? ` · ${esc(l.behind.name)} ${l.behind.gap} puan önde` : l.rank===1? " 👑":""); }
+function ord(n){ const s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function rankLine(l){ return `You're ${ord(l.rank)}` + (l.behind? (l.behind.gap? ` · ${esc(l.behind.name)} is ${l.behind.gap} points ahead` : ` · tied with ${esc(l.behind.name)}`) : l.rank===1? " 👑":""); }
 
 /* ---------------- başlat ---------------- */
 if (params.has("pin") || params.has("play")) playerApp(); else hostApp();
