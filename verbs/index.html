@@ -53,6 +53,8 @@ main{max-width:900px;margin:0 auto 40px;padding:0 12px;display:flex;flex-directi
 .info .def{color:#333}.info .def b{color:var(--bg)}
 .info .ex{color:#555;font-style:italic}.info .ex b{color:var(--ink);font-style:normal}
 .info .ex.hidden{cursor:pointer;filter:blur(5px);user-select:none}
+.tapbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--bg);color:#fff;font-weight:900;font-size:1.05rem;border-radius:999px;padding:13px 22px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:20;display:flex;gap:10px;align-items:center}
+.tapbar{white-space:nowrap}.tapbar small{font-weight:600;opacity:.85}
 .empty{text-align:center;color:var(--muted);font-weight:700;padding:30px}
 footer{text-align:center;color:var(--muted);font-size:.8rem;font-weight:600;padding:10px 0 30px}
 @media (max-width:480px){ .f .w{font-size:.92rem} .f .p{font-size:.7rem} .row,.head{grid-template-columns:36px 1fr 1fr 1fr;gap:5px} .row{padding:6px} }
@@ -68,7 +70,7 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;font-weight:600;padd
   <div class="tools">
     <label class="search">🔎<input id="q" placeholder="Search a verb… (e.g. bought)" autocomplete="off"></label>
     <div class="chips" id="pages">
-      <button class="chip on" data-p="all">All</button><button class="chip" data-p="p1">Page 1</button><button class="chip" data-p="p2">Page 2</button><button class="chip" data-p="p3">Page 3</button>
+      <button class="chip" data-p="all">All</button><button class="chip on" data-p="p1">Page 1</button><button class="chip" data-p="p2">Page 2</button><button class="chip" data-p="p3">Page 3</button>
     </div>
     <button class="toggle" id="test"><span class="sw"></span>Test yourself (hide V2 &amp; V3)</button>
   </div>
@@ -84,7 +86,7 @@ const PAGES={p1:["awake","go"],p2:["grow","sing"],p3:["sink","write"]};
 const idx=v=>DATA.findIndex(r=>r[0]===v);
 const pageOf=v=>{const i=idx(v);return i<=idx("go")?"p1":i<=idx("sing")?"p2":"p3";};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let page="all", q="", testMode=false;
+let page="p1", q="", testMode=false;
 const player=new Audio(); let queue=[], curRow=null;
 function play(v,n){ queue=[]; playOne(v,n); }
 function playOne(v,n){
@@ -133,8 +135,28 @@ document.getElementById("pages").addEventListener("click",e=>{ const c=e.target.
   document.querySelectorAll("#pages .chip").forEach(x=>x.classList.toggle("on",x===c)); page=c.dataset.p; render(); });
 document.getElementById("test").addEventListener("click",e=>{ testMode=!testMode; e.currentTarget.classList.toggle("on",testMode); render(); });
 render();
-// #v-awake gibi bir bağlantıyla gelindiyse o fiile kaydır
-if(location.hash.startsWith("#v-")){ const el=document.querySelector(location.hash); if(el){ el.scrollIntoView({block:"center"}); el.classList.add("playing"); setTimeout(()=>el.classList.remove("playing"),2500);} }
+// PDF'teki bir kelimeden gelindiyse (?w=awake-2): o fiile kaydır, kelimeyi işaretle ve çal
+(function(){
+  const w=new URLSearchParams(location.search).get("w") || "";
+  const m=w.match(/^([a-z]+)-([123])$/);
+  const v = m? m[1] : (location.hash.startsWith("#v-")? location.hash.slice(3) : "");
+  if(!v || idx(v)<0) return;
+  page=pageOf(v); document.querySelectorAll("#pages .chip").forEach(x=>x.classList.toggle("on",x.dataset.p===page)); render();
+  const row=document.getElementById("v-"+v); if(!row) return;
+  setTimeout(()=>{ row.scrollIntoView({block:"center"}); row.classList.add("playing"); setTimeout(()=>row.classList.remove("playing"),3000); },60);
+  if(!m) return;
+  const n=m[2], cellEl=document.querySelector(`.f[data-v="${v}"][data-n="${n}"]`);
+  const label=cellEl? cellEl.querySelector(".w").textContent : v;
+  player.src="audio/"+v+"-"+n+".mp3";
+  player.play().then(()=>{ cellEl&&cellEl.classList.add("on"); }).catch(()=>{
+    // telefon kendiliğinden ses çalmaya izin vermediyse: dokununca çal
+    const bar=document.createElement("button"); bar.className="tapbar";
+    bar.innerHTML=`▶ Tap to hear <b>${esc(label)}</b>`;
+    bar.onclick=()=>{ bar.remove(); play(v,n); };
+    document.body.appendChild(bar);
+    setTimeout(()=>bar.remove(),12000);
+  });
+})();
 </script>
 </body>
 </html>
